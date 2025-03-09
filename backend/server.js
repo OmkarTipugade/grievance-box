@@ -46,7 +46,7 @@ app.post("/grievance", async (req, res) => {
 
     // Then send email
     const mailOptions = {
-      from: "omtipugade3904@gmail.com",
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Grievance Application Submitted",
       text: `Dear ${name},\n\nYour grievance has been successfully submitted. Here are the details:\n\n
