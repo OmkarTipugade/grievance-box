@@ -118,7 +118,7 @@ const GrievanceForm = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your PRN No."
+              placeholder="Enter your Email"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
