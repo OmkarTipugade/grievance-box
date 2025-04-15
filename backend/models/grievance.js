@@ -6,9 +6,14 @@ const grievanceSchema = new mongoose.Schema({
   prn: { type: String, required: true },
   email: { type: String, required: true },
   grievanceType: { type: String, required: true },
+  department: { type: String, required: true },
   description: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  resolved: { type: Boolean, default: false },
+  resolved: {
+    type: String,
+    enum: ["false", "true", "scrutiny"],
+    default: "false",
+  },
   resolvedAt: { type: Date },
 });
 

@@ -29,19 +29,19 @@ const MeetOurTeam = () => {
         />
         <TeamMember
           name="Omkar Tipugade"
-          role="Fronted Developer"
+          role="Full Stack Dev."
           link="https://www.linkedin.com/in/omkar-tipugade/"
           imgUrl={omkar}
         />
         <TeamMember
           name="Rutuja Rajigare"
-          role="Backend Developer, Database"
+          role="Backend Developer"
           link="https://www.linkedin.com/in/rutuja-rajigare-66313a276/"
           imgUrl={rutuja}
         />
         <TeamMember
           name="Saloni Patil"
-          role="Backend Developer, API"
+          role="Backend Develope"
           link="https://www.linkedin.com/in/saloni-patil07/"
           imgUrl={saloni}
         />

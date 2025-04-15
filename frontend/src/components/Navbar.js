@@ -19,8 +19,14 @@ const Navbar = () => {
           <Link to="/" className="text-white hover:text-gray-300">
             Home
           </Link>
+          <Link to="/login" className="text-white hover:text-gray-300">
+            Dashboard
+          </Link>
           <Link to="/grievanceform" className="text-white hover:text-gray-300">
             Add Grievance
+          </Link>
+          <Link to="/check-status" className="text-white hover:text-gray-300">
+            Check Grievance
           </Link>
           <Link to="/about" className="text-white hover:text-gray-300">
             About Us
@@ -28,7 +34,6 @@ const Navbar = () => {
           <Link to="/contact" className="text-white hover:text-gray-300">
             Contact Us
           </Link>
-          
         </div>
 
         <div className="md:hidden">
@@ -47,22 +52,48 @@ const Navbar = () => {
           isMenuOpen ? "block" : "hidden"
         } md:hidden bg-green-600 p-4 space-y-2`}
       >
-        <Link to="/"  onClick={()=>setIsMenuOpen(false)} className="block text-white hover:bg-green-700 p-2">
+        <Link
+          to="/"
+          onClick={() => setIsMenuOpen(false)}
+          className="block text-white hover:bg-green-700 p-2"
+        >
           Home
         </Link>
         <Link
-          to="/grievanceform" onClick={()=>setIsMenuOpen(false)}
+          to="/login"
+          onClick={() => setIsMenuOpen(false)}
+          className="block text-white hover:bg-green-700 p-2"
+        >
+          Dashboard
+        </Link>
+        <Link
+          to="/grievanceform"
+          onClick={() => setIsMenuOpen(false)}
           className="block text-white hover:bg-green-700 p-2"
         >
           Add Grievance
         </Link>
-        <Link to="/about" onClick={()=>setIsMenuOpen(false)} className="block text-white hover:bg-green-700 p-2">
+        <Link
+          to="/details"
+          onClick={() => setIsMenuOpen(false)}
+          className="block text-white hover:bg-green-700 p-2"
+        >
+          Check Grievance
+        </Link>
+        <Link
+          to="/about"
+          onClick={() => setIsMenuOpen(false)}
+          className="block text-white hover:bg-green-700 p-2"
+        >
           About Us
         </Link>
-        <Link to="/contact" onClick={()=>setIsMenuOpen(false)} className="block text-white hover:bg-green-700 p-2">
+        <Link
+          to="/contact"
+          onClick={() => setIsMenuOpen(false)}
+          className="block text-white hover:bg-green-700 p-2"
+        >
           Contact Us
         </Link>
-        
       </div>
     </nav>
   );

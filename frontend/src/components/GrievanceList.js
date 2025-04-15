@@ -7,7 +7,7 @@ const GrievanceList = () => {
   useEffect(() => {
     const fetchGrievances = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/grievances");
+        const response = await axios.get("http://localhost:5000/all-grievances");
         setGrievances(response.data);
       } catch (error) {
         console.error("Error fetching grievances:", error);
@@ -22,12 +22,17 @@ const GrievanceList = () => {
       <ul>
         {grievances.map((grievance) => (
           <li key={grievance._id} className="border p-4 my-2">
+            <p><strong>Application No.:</strong> {grievance.applicationNumber}</p>
             <p><strong>Name:</strong> {grievance.name}</p>
             <p><strong>PRN:</strong> {grievance.prn}</p>
             <p><strong>Email:</strong> {grievance.email}</p>
             <p><strong>Type:</strong> {grievance.grievanceType}</p>
             <p><strong>Description:</strong> {grievance.description}</p>
             <p><strong>Date:</strong> {new Date(grievance.createdAt).toLocaleString()}</p>
+            <p><strong>Status:</strong>{grievance.resolved? 'Resolved':'Under Investigation'}</p>
+            {grievance.resolved && (
+              <p className="text-green-500">Resolved: {new Date(grievance.resolvedAt).toLocaleString()}</p>
+            )}
           </li>
         ))}
       </ul>

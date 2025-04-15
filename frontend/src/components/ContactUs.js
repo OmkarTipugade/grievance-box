@@ -32,11 +32,17 @@ const ContactUs = () => {
             <p>https://coes.dypgroup.edu.in</p>
           </div>
         </a>
-        <div className="flex flex-row text-xl items-center">
+        <div className="flex flex-row text-xl items-center cursor-pointer">
           <FaLocationDot className="mr-2" />
-          <p>
-            R. S. No. 865 A-Ward, Salokhe Nagar, Kolhapur, Maharashtra 416001
-          </p>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://www.google.com/search?sca_esv=faf73f5b27e4e0f4&tbm=lcl&sxsrf=AHTn8zrAgOlEPusftQxbDJiN1_5_CuKoVw:1744471199537&q=dr.+d+y+patil+pratishthan%27s+college+of+engineering+kolhapur&rflfq=1&num=10&sa=X&ved=2ahUKEwjNj63R5dKMAxWgzTgGHXQ_PZYQtgN6BAghEAM#rlfi=hd:;si:;mv:[[16.735958999999998,74.242599],[16.663738900000002,74.20397559999999]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e3!3sIAE,lf:1,lf_ui:2"
+          >
+            <p>
+              R. S. No. 865 A-Ward, Salokhe Nagar, Kolhapur, Maharashtra 416001
+            </p>
+          </a>
         </div>
       </div>
     </div>
