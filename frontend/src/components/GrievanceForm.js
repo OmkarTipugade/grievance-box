@@ -5,6 +5,7 @@ const GrievanceForm = () => {
     name: "",
     prn: "",
     email: "",
+    department: "",
     grievanceType: "",
     description: "",
   });
@@ -17,6 +18,14 @@ const GrievanceForm = () => {
     "Hostel",
     "Disciplinary",
     "Other",
+  ];
+
+  const departments = [
+    "First Year",
+    "Computer Science Eng.",
+    "Civil Eng.",
+    "Electrical Eng.",
+    "Data Science Eng.",
   ];
 
   const handleChange = (e) => {
@@ -42,7 +51,7 @@ const GrievanceForm = () => {
       setTimeout(() => {
         setSubmitted(false);
       }, 5000);
-      
+
       setFormData({
         name: "",
         prn: "",
@@ -79,7 +88,7 @@ const GrievanceForm = () => {
               type="text"
               id="name"
               name="name"
-              value={formData.name}
+              value={formData.name.toLowerCase()}
               onChange={handleChange}
               required
               placeholder="Enter your full name"
@@ -97,8 +106,14 @@ const GrievanceForm = () => {
               type="number"
               id="prn"
               name="prn"
+              max={9999999999}
               value={formData.prn}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length <= 10) {
+                  handleChange(e);
+                }
+              }}
               required
               placeholder="Enter your PRN No."
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -124,6 +139,29 @@ const GrievanceForm = () => {
           </div>
           <div className="gf-field flex flex-col">
             <label
+              htmlFor="department"
+              className="font-medium text-gray-700 text-left"
+            >
+              Department <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="department"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select Department</option>
+              {departments.map((type, index) => (
+                <option key={index} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="gf-field flex flex-col">
+            <label
               htmlFor="grievanceType"
               className="font-medium text-gray-700 text-left"
             >
@@ -137,7 +175,7 @@ const GrievanceForm = () => {
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
-              <option value="">--Select Grievance Type--</option>
+              <option value="">Select Grievance Type</option>
               {grievanceTypes.map((type, index) => (
                 <option key={index} value={type}>
                   {type}

@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
-    // onLogin(username, password);
+    if (!username || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+    if (username === "admin.dypsn" && password === "admin@dypsn") {
+      navigate("/dash");
+    } else {
+      alert("Invalid credentials");
+    }
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 sm:px-6 lg:px-8">
@@ -40,22 +48,14 @@ const LoginForm = () => {
             />
           </div>
           <button
+            onClick={handleSubmit}
+            disabled={!username || !password}
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-base sm:text-lg lg:text-xl"
           >
             Sign in
           </button>
         </form>
-        <p className="text-base sm:text-lg lg:text-xl text-gray-600 mt-4 text-center">
-          Don't have an account?{" "}
-          <a
-            href="#"
-            // onClick={() => setShowSignup(true)}
-            className="text-green-700 hover:underline"
-          >
-            Sign up
-          </a>
-        </p>
       </div>
     </div>
   );

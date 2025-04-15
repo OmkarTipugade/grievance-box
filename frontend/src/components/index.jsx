@@ -1,14 +1,16 @@
 import React from "react";
 import HomeScreen from "./HomeScreen";
-import VisionMission from "./VisionMission";
 import AboutUs from "./AboutUs";
 import MeetOurTeam from "./MeetOurTeam";
 import ContactUs from "./ContactUs";
-import LoginForm from "./LoginForm";
-import SignUpForm from "./SignUpForm";
 import GrievanceForm from "./GrievanceForm";
 import Navbar from "./Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import GrievanceList from "./GrievanceList.js";
+import Dashboard from "./dashboard.js";
+import CheckGreivance from "./CheckGreivance.js";
+import GrievanceDetails from "./GrievanceDetails.js";
+import LoginForm from "./LoginForm.js";
 
 const index = () => {
   return (
@@ -22,8 +24,6 @@ const index = () => {
             element={
               <>
                 <HomeScreen />
-                <VisionMission />
-                <AboutUs />
                 <MeetOurTeam />
                 <ContactUs />
               </>
@@ -32,6 +32,11 @@ const index = () => {
           <Route exact path="/grievanceform" element={<GrievanceForm />} />
           <Route exact path="/about" element={<AboutUs />} />
           <Route exact path="/contact" element={<ContactUs />} />
+          <Route exact path="/gr-list" element={<GrievanceList />} />
+          <Route exact path="/dash" element={<Dashboard />} />
+          <Route exact path="/check-status" element={<CheckGreivance />} />
+          <Route exact path="/details" element={<GrievanceDetails />} />
+          <Route exact path="/login" element={<LoginForm />} />
         </Routes>
       </Router>
     </div>
