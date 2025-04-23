@@ -1,39 +1,20 @@
-const dotenv = require("dotenv");
-const express = require("express");
-const nodemailer = require("nodemailer");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const Grievance = require("./models/grievance");
-const PORT = process.env.PORT || 5000;
+const Grievance = require("../models/grievance");
+const createTransporter = require("../config/email");
+const generateApplicationNumber = require("../utils/generateApplicationNumber");
+const EmailResponse = require("../models/EmailResponse");
 
-dotenv.config();
+// Get transporter
+const transporter = createTransporter();
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-const mongoURI = process.env.MONGODB_URI;
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  debug: true, // Show debug output
-  logger: true, // Log information about the mail transport
-});
-
-const generateApplicationNumber = () => {
-  return `GRV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-};
-
-// Route to handle grievance form submission
-app.post("/grievance", async (req, res) => {
+/**
+ * Create a new grievance
+ */
+exports.createGrievance = async (req, res) => {
   try {
     const { name, email, grievanceType, description } = req.body;
-    const applicationNumber = generateApplicationNumber(); // Generate once here
+    const applicationNumber = generateApplicationNumber();
 
-    // Create and save grievance first
+    // Format data (convert string fields to lowercase)
     const lowercaseData = Object.keys(req.body).reduce((acc, key) => {
       acc[key] =
         typeof req.body[key] === "string"
@@ -42,14 +23,15 @@ app.post("/grievance", async (req, res) => {
       return acc;
     }, {});
 
+    // Create and save new grievance
     const newGrievance = new Grievance({
       ...lowercaseData,
-      applicationNumber, // Use the same application number
+      applicationNumber,
     });
 
     await newGrievance.save();
 
-    // Then send email
+    // Send confirmation email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -72,7 +54,6 @@ app.post("/grievance", async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    // Send single response
     res.status(201).json({
       message: "Grievance submitted successfully!",
       applicationNumber: applicationNumber,
@@ -84,18 +65,26 @@ app.post("/grievance", async (req, res) => {
       error: error.message,
     });
   }
-});
+};
 
-app.get("/all-grievances", async (req, res) => {
+/**
+ * Get all grievances
+ */
+exports.getAllGrievances = async (req, res) => {
   try {
     const grievances = await Grievance.find();
     res.status(200).json(grievances);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching grievances", error });
+    res
+      .status(500)
+      .json({ message: "Error fetching grievances", error: error.message });
   }
-});
+};
 
-app.get("/grievance/:applicationNumber", async (req, res) => {
+/**
+ * Get a single grievance by application number
+ */
+exports.getGrievanceByAppNumber = async (req, res) => {
   const { applicationNumber } = req.params;
   try {
     const grievance = await Grievance.findOne({ applicationNumber });
@@ -104,10 +93,16 @@ app.get("/grievance/:applicationNumber", async (req, res) => {
     }
     res.status(200).json(grievance);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching grievance", error });
+    res
+      .status(500)
+      .json({ message: "Error fetching grievance", error: error.message });
   }
-});
-app.patch("/grievance/:applicationNumber/resolve", async (req, res) => {
+};
+
+/**
+ * Resolve a grievance
+ */
+exports.resolveGrievance = async (req, res) => {
   const { applicationNumber } = req.params;
 
   try {
@@ -145,16 +140,22 @@ app.patch("/grievance/:applicationNumber/resolve", async (req, res) => {
     `,
     };
     await transporter.sendMail(mailOptions);
+
     res.status(200).json({
       message: "Grievance marked as resolved",
       grievance: updatedGrievance,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating grievance", error });
+    res
+      .status(500)
+      .json({ message: "Error updating grievance", error: error.message });
   }
-});
+};
 
-app.patch("/grievance/:applicationNumber/reject", async (req, res) => {
+/**
+ * Reject a grievance
+ */
+exports.rejectGrievance = async (req, res) => {
   const { applicationNumber } = req.params;
   const { reason } = req.body;
 
@@ -195,16 +196,22 @@ app.patch("/grievance/:applicationNumber/reject", async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+
     res.status(200).json({
       message: "Grievance marked as rejected",
       grievance: updatedGrievance,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating grievance", error });
+    res
+      .status(500)
+      .json({ message: "Error updating grievance", error: error.message });
   }
-});
+};
 
-app.patch("/grievance/:applicationNumber/scrutiny", async (req, res) => {
+/**
+ * Mark grievance as under scrutiny
+ */
+exports.markUnderScrutiny = async (req, res) => {
   const { applicationNumber } = req.params;
 
   try {
@@ -223,22 +230,16 @@ app.patch("/grievance/:applicationNumber/scrutiny", async (req, res) => {
       grievance: updatedGrievance,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating grievance", error });
+    res
+      .status(500)
+      .json({ message: "Error updating grievance", error: error.message });
   }
-});
+};
 
-//delete all grievances
-app.delete("/grievance", async (req, res) => {
-  try {
-    await Grievance.deleteMany({});
-    res.status(200).json({ message: "All grievances deleted" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting grievances", error });
-  }
-});
-
-// update reason for rejection property
-app.patch("/grievance/:applicationNumber/reason", async (req, res) => {
+/**
+ * Update rejection reason
+ */
+exports.updateRejectionReason = async (req, res) => {
   const { applicationNumber } = req.params;
   const { reason } = req.body;
 
@@ -258,29 +259,43 @@ app.patch("/grievance/:applicationNumber/reason", async (req, res) => {
       grievance: updatedGrievance,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating grievance", error });
+    res
+      .status(500)
+      .json({ message: "Error updating grievance", error: error.message });
   }
-});
+};
 
-// Send grievance details for verification
-app.post("/send-verification-email", async (req, res) => {
+/**
+ * Delete all grievances
+ */
+exports.deleteAllGrievances = async (req, res) => {
   try {
-    const { to, applicationNumber, subject } = req.body;
+    await Grievance.deleteMany({});
+    res.status(200).json({ message: "All grievances deleted" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting grievances", error: error.message });
+  }
+};
 
-    // Validate request data
+/**
+ * Send verification email
+ */
+exports.sendVerificationEmail = async (req, res) => {
+  try {
+    const { to, applicationNumber } = req.body;
+
     if (!to || !applicationNumber) {
-      console.log("Missing required fields:", { to, applicationNumber });
       return res
         .status(400)
         .json({ message: "Email address and application number are required" });
     }
 
     // Fetch grievance details
-    console.log("Fetching grievance:", applicationNumber);
     const grievance = await Grievance.findOne({ applicationNumber });
 
     if (!grievance) {
-      console.log("Grievance not found:", applicationNumber);
       return res.status(404).json({ message: "Grievance not found" });
     }
 
@@ -288,8 +303,7 @@ app.post("/send-verification-email", async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: to,
-      subject:
-        subject || `Grievance Verification Request: ${applicationNumber}`,
+      subject: `Grievance Verification Request: ${applicationNumber}`,
       text: `
 Dear Concerned Department,
 
@@ -319,41 +333,10 @@ GrievanceBox Administration
       `,
     };
 
-    // Log email details for debugging
-    console.log("Sending email with options:", {
-      from: process.env.EMAIL_USER,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-    });
+    // Send email
+    await transporter.sendMail(mailOptions);
 
-    try {
-      // Send email
-      const info = await transporter.sendMail(mailOptions);
-      console.log("Email sent successfully:", info.messageId);
-
-      res.status(200).json({
-        message: "Verification email sent successfully",
-        messageId: info.messageId,
-      });
-    } catch (emailError) {
-      console.error("Error in transporter.sendMail:", emailError);
-
-      // Check for specific nodemailer errors
-      let errorMessage = "An error occurred while sending verification email";
-
-      if (emailError.code === "EAUTH") {
-        errorMessage = "Authentication failed. Please check email credentials.";
-      } else if (emailError.code === "ESOCKET") {
-        errorMessage = "Network error while connecting to mail server.";
-      } else if (emailError.code === "ECONNECTION") {
-        errorMessage = "Connection error. Please check network settings.";
-      }
-
-      return res.status(500).json({
-        message: errorMessage,
-        error: emailError.message,
-      });
-    }
+    res.status(200).json({ message: "Verification email sent successfully" });
   } catch (error) {
     console.error("Error sending verification email:", error);
     res.status(500).json({
@@ -361,123 +344,102 @@ GrievanceBox Administration
       error: error.message,
     });
   }
-});
+};
 
-// Get all responses for a grievance
-app.get("/grievance/:applicationNumber/responses", async (req, res) => {
+/**
+ * Get email responses for a grievance
+ */
+exports.getEmailResponses = async (req, res) => {
   try {
     const { applicationNumber } = req.params;
 
-    // Fetch grievance to ensure it exists
+    // Validate that the grievance exists
     const grievance = await Grievance.findOne({ applicationNumber });
-
     if (!grievance) {
       return res.status(404).json({ message: "Grievance not found" });
     }
 
-    // If responses are stored in the grievance model
-    const responses = grievance.responses || [];
-
-    res.status(200).json({
-      message: "Responses retrieved successfully",
-      responses,
-    });
-  } catch (error) {
-    console.error("Error retrieving responses:", error);
-    res.status(500).json({
-      message: "An error occurred while retrieving responses",
-      error: error.message,
-    });
-  }
-});
-
-// Add a response to a grievance
-app.post("/grievance/:applicationNumber/response", async (req, res) => {
-  try {
-    const { applicationNumber } = req.params;
-    const responseData = req.body;
-
-    if (!responseData.message) {
-      return res.status(400).json({ message: "Response message is required" });
-    }
-
-    // Fetch grievance
-    const grievance = await Grievance.findOne({ applicationNumber });
-
-    if (!grievance) {
-      return res.status(404).json({ message: "Grievance not found" });
-    }
-
-    // Prepare the response with an ID and timestamp
-    const newResponse = {
-      id: `resp-${Date.now()}`,
-      from: responseData.from || "Admin",
-      email: responseData.email || "admin@example.com",
-      message: responseData.message,
-      timestamp: new Date(),
-      activityType: responseData.activityType || "EmailResponse",
-    };
-
-    // If the grievance doesn't have a responses array, initialize it
-    if (!grievance.responses) {
-      grievance.responses = [];
-    }
-
-    // Add the response
-    grievance.responses.unshift(newResponse);
-
-    // Save the updated grievance
-    await grievance.save();
-
-    res.status(201).json({
-      message: "Response added successfully",
-      response: newResponse,
-    });
-  } catch (error) {
-    console.error("Error adding response:", error);
-    res.status(500).json({
-      message: "An error occurred while adding the response",
-      error: error.message,
-    });
-  }
-});
-
-// Add a verification endpoint to check email configuration
-app.get("/verify-email-config", async (req, res) => {
-  try {
-    // Verify the email configuration
-    const verifyResult = await transporter.verify();
+    // Find all responses for this grievance
+    const responses = await EmailResponse.find({ applicationNumber }).sort({
+      createdAt: -1,
+    }); // Latest responses first
 
     res.status(200).json({
       success: true,
-      message: "Email configuration is valid",
-      emailUser: process.env.EMAIL_USER,
-      // Don't expose the actual password, just whether it's set
-      emailPassSet: !!process.env.EMAIL_PASS,
+      responses,
     });
   } catch (error) {
-    console.error("Email configuration error:", error);
+    console.error("Error fetching email responses:", error);
     res.status(500).json({
-      success: false,
-      message: "Email configuration is invalid",
+      message: "Error fetching email responses",
       error: error.message,
     });
   }
-});
+};
 
-mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log("Connected to MongoDB Database");
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+/**
+ * Submit a response to a grievance verification email
+ */
+exports.submitEmailResponse = async (req, res) => {
+  try {
+    const { applicationNumber } = req.params;
+    const { from, email, message } = req.body;
+
+    if (!from || !email || !message) {
+      return res.status(400).json({
+        message:
+          "Missing required fields: from, email, and message are required",
+      });
+    }
+
+    // Validate that the grievance exists
+    const grievance = await Grievance.findOne({ applicationNumber });
+    if (!grievance) {
+      return res.status(404).json({ message: "Grievance not found" });
+    }
+
+    // Create a new response
+    const emailResponse = new EmailResponse({
+      applicationNumber,
+      from,
+      email,
+      message,
+      timestamp: new Date(),
     });
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB Database:", err);
-    process.exit(1);
-  });
 
-app.get("/", (req, res) => {
-  res.send("GrievanceBox API is running");
-});
+    await emailResponse.save();
+
+    // Notify the student about the response
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: grievance.email,
+      subject: `Response received on your grievance: ${applicationNumber}`,
+      text: `
+Dear ${grievance.name},
+
+${from} has responded to your grievance (${applicationNumber}). Here's their message:
+
+"${message}"
+
+You can view the full details by logging into your grievance portal.
+
+Regards,
+GrievanceBox Team
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({
+      success: true,
+      message: "Response submitted successfully",
+      response: emailResponse,
+    });
+  } catch (error) {
+    console.error("Error submitting email response:", error);
+    res.status(500).json({
+      message: "Error submitting email response",
+      error: error.message,
+    });
+  }
+};

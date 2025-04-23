@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 const HomeScreen = () => {
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="relative h-screen w-full">
         <video
           className="absolute top-0 left-0 w-full h-full object-cover"
