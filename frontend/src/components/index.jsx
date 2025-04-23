@@ -11,6 +11,7 @@ import Dashboard from "./dashboard.js";
 import CheckGreivance from "./CheckGreivance.js";
 import GrievanceDetails from "./GrievanceDetails.js";
 import LoginForm from "./LoginForm.js";
+import GrievanceDetailsDash from "./GrievanceDetailsDash.js";
 
 const index = () => {
   return (
@@ -37,6 +38,11 @@ const index = () => {
           <Route exact path="/check-status" element={<CheckGreivance />} />
           <Route exact path="/details" element={<GrievanceDetails />} />
           <Route exact path="/login" element={<LoginForm />} />
+          <Route
+            exact
+            path="/dash-details"
+            element={<GrievanceDetailsDash />}
+          />
         </Routes>
       </Router>
     </div>

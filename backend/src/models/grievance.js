@@ -1,14 +1,5 @@
 const mongoose = require("mongoose");
 
-const responseSchema = new mongoose.Schema({
-  id: { type: String, required: true },
-  from: { type: String, required: true },
-  email: { type: String, required: true },
-  message: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
-  activityType: { type: String, default: "EmailResponse" },
-});
-
 const grievanceSchema = new mongoose.Schema({
   applicationNumber: { type: String, unique: true, required: true },
   name: { type: String, required: true },
@@ -26,7 +17,6 @@ const grievanceSchema = new mongoose.Schema({
   resolvedAt: { type: Date },
   rejectedAt: { type: Date },
   reason: { type: String },
-  responses: [responseSchema],
 });
 
 module.exports = mongoose.model("Grievance", grievanceSchema);
