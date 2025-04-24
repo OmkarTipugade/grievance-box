@@ -10,7 +10,9 @@ const GrievanceForm = () => {
     description: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [applicationNumber, setApplicationNumber] = useState("");
 
   const grievanceTypes = [
     "Academic",
@@ -35,6 +37,7 @@ const GrievanceForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const response = await axios.post(
@@ -42,26 +45,27 @@ const GrievanceForm = () => {
         formData
       );
 
-      alert(
-        `Grievance submitted!\n Please note down Your Application Number is: ${response.data.applicationNumber}`
-      );
-
+      setApplicationNumber(response.data.applicationNumber);
       setSubmitted(true);
 
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 5000);
-
+      // Reset form
       setFormData({
         name: "",
         prn: "",
         email: "",
+        department: "",
         grievanceType: "",
         description: "",
       });
     } catch (error) {
       console.error("Error submitting grievance:", error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleClosePopup = () => {
+    setSubmitted(false);
   };
 
   return (
@@ -71,9 +75,31 @@ const GrievanceForm = () => {
           Grievance Form
         </h2>
         {submitted && (
-          <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
-            Thank you for submitting your grievance. We will address it
-            promptly.
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+              <h3 className="text-2xl font-bold text-green-600 mb-4">
+                Grievance Submitted Successfully!
+              </h3>
+              <p className="mb-4">
+                Thank you for submitting your grievance. We will address it
+                promptly.
+              </p>
+              <div className="bg-gray-100 p-4 rounded-md mb-4">
+                <p className="font-semibold">Your Application Number:</p>
+                <p className="text-xl font-bold text-blue-700">
+                  {applicationNumber}
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Please save this number for future reference.
+                </p>
+              </div>
+              <button
+                onClick={handleClosePopup}
+                className="w-full bg-green-600 text-white py-2 px-4 rounded-md shadow hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
         <form className="space-y-4 text-base" onSubmit={handleSubmit}>
@@ -202,9 +228,40 @@ const GrievanceForm = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md shadow hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+            disabled={isSubmitting}
+            className={`w-full py-2 px-4 rounded-md shadow transition duration-300 flex items-center justify-center ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+            }`}
           >
-            Submit
+            {isSubmitting ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Submitting...
+              </>
+            ) : (
+              "Submit"
+            )}
           </button>
         </form>
       </div>
