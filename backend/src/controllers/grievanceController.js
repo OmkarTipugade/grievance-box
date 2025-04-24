@@ -2,9 +2,29 @@ const Grievance = require("../models/grievance");
 const createTransporter = require("../config/email");
 const generateApplicationNumber = require("../utils/generateApplicationNumber");
 const EmailResponse = require("../models/EmailResponse");
+const nodemailer = require("nodemailer");
 
-// Get transporter
-const transporter = createTransporter();
+// Get transporter with proper error handling
+const getTransporter = () => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      debug: true, // Show debug output
+      logger: true, // Log information about the mail transport
+    });
+
+    return transporter;
+  } catch (error) {
+    console.error("Error creating email transporter:", error);
+    throw new Error("Failed to create email transporter");
+  }
+};
+
+const transporter = getTransporter();
 
 /**
  * Create a new grievance
@@ -30,29 +50,37 @@ exports.createGrievance = async (req, res) => {
     });
 
     await newGrievance.save();
+    console.log("Grievance saved successfully:", applicationNumber);
 
-    // Send confirmation email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "📬 Grievance Application Submitted Successfully!",
-      text: `Dear ${name},
-    
-    ✅ We have received your grievance. Below are the details you submitted:
-    
-    🆔 Application Number: ${applicationNumber}
-    📌 Grievance Type: ${grievanceType}
-    📝 Description: ${description}
-    
-    Our team has started reviewing your concern. We aim to address your grievance as quickly and efficiently as possible.
-    
-    Thank you for reaching out to us and trusting GrievanceBox.
-    
-    Warm regards,  
-    GrievanceBox Support Team`,
-    };
+    try {
+      // Send confirmation email
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "📬 Grievance Application Submitted Successfully!",
+        text: `Dear ${name},
+      
+      ✅ We have received your grievance. Below are the details you submitted:
+      
+      🆔 Application Number: ${applicationNumber}
+      📌 Grievance Type: ${grievanceType}
+      📝 Description: ${description}
+      
+      Our team has started reviewing your concern. We aim to address your grievance as quickly and efficiently as possible.
+      
+      Thank you for reaching out to us and trusting GrievanceBox.
+      
+      Warm regards,  
+      GrievanceBox Support Team`,
+      };
 
-    await transporter.sendMail(mailOptions);
+      console.log("Attempting to send email to:", email);
+      await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully to:", email);
+    } catch (emailError) {
+      // Log email error but don't fail the request
+      console.error("Failed to send email notification:", emailError);
+    }
 
     res.status(201).json({
       message: "Grievance submitted successfully!",
@@ -116,30 +144,38 @@ exports.resolveGrievance = async (req, res) => {
       return res.status(404).json({ message: "Grievance not found" });
     }
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: updatedGrievance.email,
-      subject: "🎉 Grievance Resolved Successfully!",
-      text: `Dear ${updatedGrievance.name},
-    
-    We are pleased to inform you that your grievance has been successfully resolved. Please find the resolution details below:
-    
-    📄 Application Number: ${updatedGrievance.applicationNumber}
-    🏢 Department: ${updatedGrievance.department || "N/A"}
-    📌 Grievance Type: ${updatedGrievance.grievanceType}
-    📝 Description: ${updatedGrievance.description}
-    ✅ Status: Resolved
-    🕓 Resolved On: ${new Date().toLocaleString()}
-    
-    We hope that the resolution meets your expectations. If you have any further questions or concerns, feel free to reach out to us.
-    
-    Thank you for using GrievanceBox.
-    
-    Warm regards,  
-    GrievanceBox Support Team
-    `,
-    };
-    await transporter.sendMail(mailOptions);
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: updatedGrievance.email,
+        subject: "🎉 Grievance Resolved Successfully!",
+        text: `Dear ${updatedGrievance.name},
+      
+      We are pleased to inform you that your grievance has been successfully resolved. Please find the resolution details below:
+      
+      📄 Application Number: ${updatedGrievance.applicationNumber}
+      🏢 Department: ${updatedGrievance.department || "N/A"}
+      📌 Grievance Type: ${updatedGrievance.grievanceType}
+      📝 Description: ${updatedGrievance.description}
+      ✅ Status: Resolved
+      🕓 Resolved On: ${new Date().toLocaleString()}
+      
+      We hope that the resolution meets your expectations. If you have any further questions or concerns, feel free to reach out to us.
+      
+      Thank you for using GrievanceBox.
+      
+      Warm regards,  
+      GrievanceBox Support Team
+      `,
+      };
+
+      console.log("Sending resolution email to:", updatedGrievance.email);
+      await transporter.sendMail(mailOptions);
+      console.log("Resolution email sent successfully");
+    } catch (emailError) {
+      console.error("Failed to send resolution email:", emailError);
+      // Continue with the response even if email fails
+    }
 
     res.status(200).json({
       message: "Grievance marked as resolved",
@@ -170,32 +206,39 @@ exports.rejectGrievance = async (req, res) => {
       return res.status(404).json({ message: "Grievance not found" });
     }
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: updatedGrievance.email,
-      subject: "⚠️ Grievance Review Update - Rejected",
-      text: `Dear ${updatedGrievance.name},
-    
-    We regret to inform you that after a thorough review, your submitted grievance could not be approved. Please find the grievance details below:
-    
-    📄 Application Number: ${updatedGrievance.applicationNumber}
-    🏢 Department: ${updatedGrievance.department || "N/A"}
-    📌 Grievance Type: ${updatedGrievance.grievanceType}
-    📝 Description: ${updatedGrievance.description}
-    ❌ Status: Rejected
-    🕓 Reviewed On: ${new Date().toLocaleString()}
-    📋 Reason: ${updatedGrievance.reason || "No reason provided"}
-    
-    We understand this may be disappointing, and we encourage you to reach out if you believe there has been a misunderstanding or if you would like to appeal this decision.
-    
-    Thank you for bringing your concern to our attention. Your feedback is valuable in helping us improve our services.
-    
-    Warm regards,  
-    GrievanceBox Support Team
-    `,
-    };
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: updatedGrievance.email,
+        subject: "⚠️ Grievance Review Update - Rejected",
+        text: `Dear ${updatedGrievance.name},
+      
+      We regret to inform you that after a thorough review, your submitted grievance could not be approved. Please find the grievance details below:
+      
+      📄 Application Number: ${updatedGrievance.applicationNumber}
+      🏢 Department: ${updatedGrievance.department || "N/A"}
+      📌 Grievance Type: ${updatedGrievance.grievanceType}
+      📝 Description: ${updatedGrievance.description}
+      ❌ Status: Rejected
+      🕓 Reviewed On: ${new Date().toLocaleString()}
+      📋 Reason: ${updatedGrievance.reason || "No reason provided"}
+      
+      We understand this may be disappointing, and we encourage you to reach out if you believe there has been a misunderstanding or if you would like to appeal this decision.
+      
+      Thank you for bringing your concern to our attention. Your feedback is valuable in helping us improve our services.
+      
+      Warm regards,  
+      GrievanceBox Support Team
+      `,
+      };
 
-    await transporter.sendMail(mailOptions);
+      console.log("Sending rejection email to:", updatedGrievance.email);
+      await transporter.sendMail(mailOptions);
+      console.log("Rejection email sent successfully");
+    } catch (emailError) {
+      console.error("Failed to send rejection email:", emailError);
+      // Continue with the response even if email fails
+    }
 
     res.status(200).json({
       message: "Grievance marked as rejected",
@@ -299,12 +342,13 @@ exports.sendVerificationEmail = async (req, res) => {
       return res.status(404).json({ message: "Grievance not found" });
     }
 
-    // Create email content
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: to,
-      subject: `Grievance Verification Request: ${applicationNumber}`,
-      text: `
+    try {
+      // Create email content
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: to,
+        subject: `Grievance Verification Request: ${applicationNumber}`,
+        text: `
 Dear Concerned Department,
 
 A grievance has been submitted that requires your verification and input. Please find the details below:
@@ -317,30 +361,39 @@ A grievance has been submitted that requires your verification and input. Please
 📌 Grievance Type: ${grievance.grievanceType}
 📝 Description: ${grievance.description}
 📊 Current Status: ${
-        grievance.resolved === "true"
-          ? "Resolved"
-          : grievance.resolved === "reject"
-          ? "Rejected"
-          : grievance.resolved === "scrutiny"
-          ? "Under Review"
-          : "Pending"
-      }
+          grievance.resolved === "true"
+            ? "Resolved"
+            : grievance.resolved === "reject"
+            ? "Rejected"
+            : grievance.resolved === "scrutiny"
+            ? "Under Review"
+            : "Pending"
+        }
 
 Please review this grievance and take appropriate action as per the institution's policy.
 
 Thank you,
 GrievanceBox Administration
-      `,
-    };
+        `,
+      };
 
-    // Send email
-    await transporter.sendMail(mailOptions);
+      console.log("Sending verification email to:", to);
+      // Send email
+      await transporter.sendMail(mailOptions);
+      console.log("Verification email sent successfully");
 
-    res.status(200).json({ message: "Verification email sent successfully" });
+      res.status(200).json({ message: "Verification email sent successfully" });
+    } catch (emailError) {
+      console.error("Error sending verification email:", emailError);
+      res.status(500).json({
+        message: "An error occurred while sending verification email",
+        error: emailError.message,
+      });
+    }
   } catch (error) {
-    console.error("Error sending verification email:", error);
+    console.error("Error in verification process:", error);
     res.status(500).json({
-      message: "An error occurred while sending verification email",
+      message: "An error occurred while processing verification",
       error: error.message,
     });
   }
@@ -409,12 +462,13 @@ exports.submitEmailResponse = async (req, res) => {
 
     await emailResponse.save();
 
-    // Notify the student about the response
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: grievance.email,
-      subject: `Response received on your grievance: ${applicationNumber}`,
-      text: `
+    try {
+      // Notify the student about the response
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: grievance.email,
+        subject: `Response received on your grievance: ${applicationNumber}`,
+        text: `
 Dear ${grievance.name},
 
 ${from} has responded to your grievance (${applicationNumber}). Here's their message:
@@ -425,10 +479,16 @@ You can view the full details by logging into your grievance portal.
 
 Regards,
 GrievanceBox Team
-      `,
-    };
+        `,
+      };
 
-    await transporter.sendMail(mailOptions);
+      console.log("Sending notification email to:", grievance.email);
+      await transporter.sendMail(mailOptions);
+      console.log("Notification email sent successfully");
+    } catch (emailError) {
+      console.error("Failed to send notification email:", emailError);
+      // Continue with the response even if email fails
+    }
 
     res.status(201).json({
       success: true,

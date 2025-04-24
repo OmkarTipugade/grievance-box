@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+
 const GrievanceForm = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -13,6 +14,7 @@ const GrievanceForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [applicationNumber, setApplicationNumber] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const grievanceTypes = [
     "Academic",
@@ -38,15 +40,28 @@ const GrievanceForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
+      console.log("Submitting form data:", formData);
       const response = await axios.post(
         "http://localhost:5000/grievance",
         formData
       );
 
-      setApplicationNumber(response.data.applicationNumber);
-      setSubmitted(true);
+      console.log("Response received:", response.data);
+
+      if (response.data && response.data.applicationNumber) {
+        setApplicationNumber(response.data.applicationNumber);
+        setSubmitted(true);
+        console.log("Application number set:", response.data.applicationNumber);
+        console.log("Submitted state set to:", true);
+      } else {
+        console.error("No application number received:", response.data);
+        setErrorMessage(
+          "Submission successful but no application number received."
+        );
+      }
 
       // Reset form
       setFormData({
@@ -59,6 +74,7 @@ const GrievanceForm = () => {
       });
     } catch (error) {
       console.error("Error submitting grievance:", error);
+      setErrorMessage("Failed to submit grievance. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,6 +82,7 @@ const GrievanceForm = () => {
 
   const handleClosePopup = () => {
     setSubmitted(false);
+    setApplicationNumber("");
   };
 
   return (
@@ -74,7 +91,9 @@ const GrievanceForm = () => {
         <h2 className="text-4xl font-semibold text-gray-800 mb-4 text-center sm:text-4xl">
           Grievance Form
         </h2>
-        {submitted && (
+
+        {/* Success Popup */}
+        {submitted && applicationNumber && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
               <h3 className="text-2xl font-bold text-green-600 mb-4">
@@ -102,6 +121,14 @@ const GrievanceForm = () => {
             </div>
           </div>
         )}
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {errorMessage}
+          </div>
+        )}
+
         <form className="space-y-4 text-base" onSubmit={handleSubmit}>
           <div className="gf-field flex flex-col">
             <label
@@ -114,7 +141,7 @@ const GrievanceForm = () => {
               type="text"
               id="name"
               name="name"
-              value={formData.name.toLowerCase()}
+              value={formData.name}
               onChange={handleChange}
               required
               placeholder="Enter your full name"
