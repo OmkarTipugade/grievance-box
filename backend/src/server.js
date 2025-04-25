@@ -1,5 +1,6 @@
 const app = require("./app");
 const connectDB = require("./config/database");
+const { verifyTransport } = require("./services/emailService");
 
 // Port configuration
 const PORT = process.env.PORT || 5000;
@@ -9,6 +10,9 @@ const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectDB();
+
+    // Verify email transport
+    await verifyTransport();
 
     // Start Express server
     app.listen(PORT, () => {
