@@ -1,7 +1,6 @@
 import React from "react";
 import HomeScreen from "./HomeScreen";
 import AboutUs from "./AboutUs";
-import MeetOurTeam from "./MeetOurTeam";
 import ContactUs from "./ContactUs";
 import GrievanceForm from "./GrievanceForm";
 import Navbar from "./Navbar";
@@ -12,7 +11,6 @@ import CheckGreivance from "./CheckGreivance.js";
 import GrievanceDetails from "./GrievanceDetails.js";
 import LoginForm from "./LoginForm.js";
 import GrievanceDetailsDash from "./GrievanceDetailsDash.js";
-
 const index = () => {
   return (
     <div>
@@ -25,7 +23,7 @@ const index = () => {
             element={
               <>
                 <HomeScreen />
-                <MeetOurTeam />
+
                 <ContactUs />
               </>
             }
