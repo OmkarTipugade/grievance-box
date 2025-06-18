@@ -20,12 +20,12 @@ const LoginForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 sm:px-6 lg:px-8">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-lg lg:max-w-xl">
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
-          Sign In
+          Admin Sign In
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="form-group">
             <label className="block text-gray-700 text-base sm:text-lg lg:text-xl font-medium mb-2">
-              Username
+              Admin Username
             </label>
             <input
               type="text"
@@ -37,7 +37,7 @@ const LoginForm = () => {
           </div>
           <div className="form-group">
             <label className="block text-gray-700 text-base sm:text-lg lg:text-xl font-medium mb-2">
-              Password
+              Admin Password
             </label>
             <input
               type="password"
