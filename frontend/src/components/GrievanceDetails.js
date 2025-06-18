@@ -33,7 +33,7 @@ const GrievanceDetails = () => {
   const fetchGrievance = async (appNumber) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/grievance/${appNumber}`
+        `https://grievance-box-xcbb.onrender.com/grievance/${appNumber}`
       );
 
       const contentType = response.headers.get("content-type");

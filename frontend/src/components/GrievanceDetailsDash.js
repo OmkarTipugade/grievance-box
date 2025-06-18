@@ -72,7 +72,7 @@ const GrievanceDetailsDash = () => {
       // Try to fetch responses from the server
       try {
         const response = await fetch(
-          `http://localhost:5000/grievance/${applicationNumber}/responses`,
+          `https://grievance-box-xcbb.onrender.com/grievance/${applicationNumber}/responses`,
           {
             method: "GET",
             headers: {
@@ -180,7 +180,7 @@ const GrievanceDetailsDash = () => {
   const fetchGrievance = async (appNumber) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/grievance/${appNumber}`
+        `https://grievance-box-xcbb.onrender.com/grievance/${appNumber}`
       );
 
       const contentType = response.headers.get("content-type");
@@ -220,7 +220,7 @@ const GrievanceDetailsDash = () => {
   const handleResolve = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/grievance/${grievance.applicationNumber}/resolve`,
+        `https://grievance-box-xcbb.onrender.com/grievance/${grievance.applicationNumber}/resolve`,
         {
           method: "PATCH",
           headers: {
@@ -256,7 +256,7 @@ const GrievanceDetailsDash = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/grievance/${grievance.applicationNumber}/reject`,
+        `https://grievance-box-xcbb.onrender.com/grievance/${grievance.applicationNumber}/reject`,
         {
           method: "PATCH",
           headers: {
@@ -330,7 +330,7 @@ const GrievanceDetailsDash = () => {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/grievance/send-verification-email",
+          "https://grievance-box-xcbb.onrender.com/grievance/send-verification-email",
           {
             method: "POST",
             headers: {
@@ -833,7 +833,7 @@ const GrievanceDetailsDash = () => {
       // Try to save to the server if the endpoint exists
       try {
         const apiResponse = await fetch(
-          `http://localhost:5000/grievance/${grievance.applicationNumber}/response`,
+          `https://grievance-box-xcbb.onrender.com/grievance/${grievance.applicationNumber}/response`,
           {
             method: "POST",
             headers: {

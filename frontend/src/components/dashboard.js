@@ -20,7 +20,9 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/grievance/all");
+      const response = await axios.get(
+        "https://grievance-box-xcbb.onrender.com/grievance/all"
+      );
       setGrievances(response.data);
       setError(null);
     } catch (error) {
@@ -46,7 +48,7 @@ const Dashboard = () => {
         return;
       }
       await axios.patch(
-        `http://localhost:5000/grievance/${grievance.applicationNumber}/scrutiny`
+        `https://grievance-box-xcbb.onrender.com/grievance/${grievance.applicationNumber}/scrutiny`
       );
     } catch (error) {
       console.error("Error handling row click:", error);

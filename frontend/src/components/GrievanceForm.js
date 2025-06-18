@@ -45,7 +45,7 @@ const GrievanceForm = () => {
     try {
       console.log("Submitting form data:", formData);
       const response = await axios.post(
-        "http://localhost:5000/grievance",
+        "https://grievance-box-xcbb.onrender.com/grievance",
         formData
       );
 

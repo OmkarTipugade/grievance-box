@@ -7,7 +7,9 @@ const GrievanceList = () => {
   useEffect(() => {
     const fetchGrievances = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/grievance/all");
+        const response = await axios.get(
+          "https://grievance-box-xcbb.onrender.com/grievance/all"
+        );
         setGrievances(response.data);
       } catch (error) {
         console.error("Error fetching grievances:", error);
