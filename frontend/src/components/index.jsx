@@ -1,50 +1,61 @@
-import React from "react";
-import HomeScreen from "./HomeScreen";
-import AboutUs from "./AboutUs";
-import ContactUs from "./ContactUs";
-import GrievanceForm from "./GrievanceForm";
-import Navbar from "./Navbar";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import GrievanceList from "./GrievanceList.js";
-import Dashboard from "./dashboard.js";
-import CheckGreivance from "./CheckGreivance.js";
-import GrievanceDetails from "./GrievanceDetails.js";
-import LoginForm from "./LoginForm.js";
-import GrievanceDetailsDash from "./GrievanceDetailsDash.js";
-const index = () => {
+import Navbar from "./Navbar";
+
+// Lazy load components
+const HomeScreen = lazy(() => import("./HomeScreen"));
+const AboutUs = lazy(() => import("./AboutUs"));
+const ContactUs = lazy(() => import("./ContactUs"));
+const GrievanceForm = lazy(() => import("./GrievanceForm"));
+const GrievanceList = lazy(() => import("./GrievanceList.js"));
+const Dashboard = lazy(() => import("./dashboard.js"));
+const CheckGreivance = lazy(() => import("./CheckGreivance.js"));
+const GrievanceDetails = lazy(() => import("./GrievanceDetails.js"));
+const LoginForm = lazy(() => import("./LoginForm.js"));
+const GrievanceDetailsDash = lazy(() => import("./GrievanceDetailsDash.js"));
+
+// Loading component for suspense fallback
+const RouteLoading = () => (
+  <div className="h-screen w-screen flex items-center justify-center bg-green-50 pt-16">
+    <div className="text-green-600 text-xl font-semibold">Loading...</div>
+  </div>
+);
+
+const Index = () => {
   return (
     <div>
       <Router>
         <Navbar />
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={
-              <>
-                <HomeScreen />
-
-                <ContactUs />
-              </>
-            }
-          />
-          <Route exact path="/grievanceform" element={<GrievanceForm />} />
-          <Route exact path="/about" element={<AboutUs />} />
-          <Route exact path="/contact" element={<ContactUs />} />
-          <Route exact path="/gr-list" element={<GrievanceList />} />
-          <Route exact path="/dash" element={<Dashboard />} />
-          <Route exact path="/check-status" element={<CheckGreivance />} />
-          <Route exact path="/details" element={<GrievanceDetails />} />
-          <Route exact path="/login" element={<LoginForm />} />
-          <Route
-            exact
-            path="/dash-details"
-            element={<GrievanceDetailsDash />}
-          />
-        </Routes>
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
+            <Route
+              exact
+              path="/"
+              element={
+                <>
+                  <HomeScreen />
+                  <ContactUs />
+                </>
+              }
+            />
+            <Route exact path="/grievanceform" element={<GrievanceForm />} />
+            <Route exact path="/about" element={<AboutUs />} />
+            <Route exact path="/contact" element={<ContactUs />} />
+            <Route exact path="/gr-list" element={<GrievanceList />} />
+            <Route exact path="/dash" element={<Dashboard />} />
+            <Route exact path="/check-status" element={<CheckGreivance />} />
+            <Route exact path="/details" element={<GrievanceDetails />} />
+            <Route exact path="/login" element={<LoginForm />} />
+            <Route
+              exact
+              path="/dash-details"
+              element={<GrievanceDetailsDash />}
+            />
+          </Routes>
+        </Suspense>
       </Router>
     </div>
   );
 };
 
-export default index;
+export default Index;

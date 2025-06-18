@@ -1,18 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import home from "../videos/home.mp4";
-import Navbar from "./Navbar";
 
 const HomeScreen = () => {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    const videoElement = document.getElementById("home-video");
+    if (videoElement) {
+      videoElement.addEventListener("loadeddata", () => {
+        setIsVideoLoaded(true);
+      });
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener("loadeddata", () => {
+          setIsVideoLoaded(true);
+        });
+      }
+    };
+  }, []);
+
   return (
     <div>
-      {/* <Navbar /> */}
       <div className="relative h-screen w-full">
+        {/* Placeholder while video loads */}
+        {!isVideoLoaded && (
+          <div className="absolute top-0 left-0 w-full h-full bg-green-800 flex items-center justify-center">
+            <div className="text-white text-xl">Loading...</div>
+          </div>
+        )}
+
         <video
+          id="home-video"
           className="absolute top-0 left-0 w-full h-full object-cover"
           src={home}
           autoPlay
+          preload="auto"
+          loading="lazy"
           loop
           muted
+          playsInline
         ></video>
 
         {/* Overlay Text */}
