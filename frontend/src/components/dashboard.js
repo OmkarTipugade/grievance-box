@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 const Dashboard = () => {
   const [grievances, setGrievances] = useState([]);
@@ -16,6 +17,16 @@ const Dashboard = () => {
   const [filterDay, setFilterDay] = useState("");
 
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -168,9 +179,24 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto p-5 mt-14">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          Grievance Management Dashboard
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
+            Grievance Management Dashboard
+          </h1>
+          <div className="flex items-center gap-4">
+            {user && (
+              <span className="text-sm text-gray-600">
+                Welcome, <span className="font-semibold">{user.username}</span>
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
